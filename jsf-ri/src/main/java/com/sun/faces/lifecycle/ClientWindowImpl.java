@@ -41,6 +41,7 @@
 package com.sun.faces.lifecycle;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.faces.component.UINamingContainer;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -70,6 +71,14 @@ public class ClientWindowImpl extends ClientWindow {
         // The hidden field always takes precedence, if present.
         if (requestParamMap.containsKey(ResponseStateManager.CLIENT_WINDOW_PARAM)) {
             id = requestParamMap.get(ResponseStateManager.CLIENT_WINDOW_PARAM);
+            // ensure the id conforms to what is specified as a valid
+            // CLIENT_WINDOW value
+            char separatorChar = UINamingContainer.getSeparatorChar(context);
+            Pattern safePattern = Pattern.compile("^[0-9a-fA-F]+" + separatorChar + "[0-9]+$");
+           
+            if (!safePattern.matcher(id).matches()) {
+              id = null;
+            }
         }
         if (null == id) {
             id = calculateClientWindow(context);
